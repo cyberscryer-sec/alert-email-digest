@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+import re
+from typing import Optional
+
+import ipinfo
+
+
 def safe_ipinfo_lookup(handler: ipinfo.Handler, ip: str) -> Optional[str]:
     """
     Return a short human-readable attribution string or None if unknown/unavailable.
@@ -16,7 +24,6 @@ def safe_ipinfo_lookup(handler: ipinfo.Handler, ip: str) -> Optional[str]:
     org = details.get("org") or ""
     out = f"from {city}, {country} ({org})".strip()
 
-    # If it came back empty-ish, treat as unknown
     normalized = out.replace(" ", "")
     if "from,()" in normalized or normalized in {"from,()", "from,()"}:
         return None
