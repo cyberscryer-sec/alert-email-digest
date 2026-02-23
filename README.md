@@ -80,7 +80,7 @@ python -m venv .venv
 .venv\Scripts\activate
 ```
 
-Install dependencies
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
