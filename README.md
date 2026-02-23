@@ -146,9 +146,7 @@ The FireEye parser preserves the original email field ordering logic observed in
 
 ## 🧪 Testing 
 
-Synthetic JSON exmaples are located in:
-`examples/fireeye_json/`
-These fixtures simulate realistic FireEye alert payloads using documentation IP ranges (RFC 5737) and contain no sensitive data.
+Synthetic JSON exmaples are located in: `examples/fireeye_json/`. These fixtures simulate realistic FireEye alert payloads using documentation IP ranges (RFC 5737) and contain no sensitive data.
 
 Unit tests validate:
 - Signature extraction
@@ -172,9 +170,10 @@ pytest
 - Add JSON-first parsing fallback
 - Support additional alert email formats
 - Output structured JSON alongside text summary
+- Add structured logging
 
 ## 📄 License
 MIT License
 
 ---
-- Add structured logging
+
