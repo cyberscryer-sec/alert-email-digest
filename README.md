@@ -26,6 +26,7 @@ This project automates analyst triage workflows in environments where security a
 
 ## 🏗 Project Structure
 
+```
 alert-email-digest/
 │
 ├── main.py
@@ -42,6 +43,7 @@ alert-email-digest/
 ├── .env.example
 ├── .gitignore
 └── LICENSE
+```
 
 ### Architecture Overview
 
