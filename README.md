@@ -101,7 +101,7 @@ $env:IPINFO_TOKEN="your_token_here"
 ```
 You can also copy .env.example to .env for local development (do NOT commit .env).
 
-## Usage
+## 🚀 Usage
 
 Basic usage:
 ```bash
@@ -123,7 +123,7 @@ python main.py \
   --region East
 ```
 
-## Example Output
+## 📝 Example Output
 ```
 FireEye East
 
@@ -137,14 +137,14 @@ FireEye East
 ------------------------------------
 ```
 
-## How Parsing Works
+## 🧠 How Parsing Works
 
 The FireEye parser preserves the original email field ordering logic observed in production alerts:
 1. Detect `sig-name:` or `sname:` lines
 2. When `src:` is encountered, the next `ip:` is treated as `src_ip`
 3. The subsequent `ip:` (when not expecting a source) is treated as `dst_ip`
 
-## Testing 
+## 🧪 Testing 
 
 Synthetic JSON exmaples are located in:
 `examples/fireeye_json/`
@@ -160,7 +160,7 @@ Run tests:
 pytest
 ```
 
-## Security Considerations
+## 🔒 Security Considerations
 
 - Do not commit real email exports.
 - Do not commit API tokens.
@@ -173,7 +173,7 @@ pytest
 - Support additional alert email formats
 - Output structured JSON alongside text summary
 
-## License
+## 📄 License
 MIT License
 
 ---
