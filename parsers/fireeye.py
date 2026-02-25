@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 from typing import Callable, Iterable, Optional, Tuple
 
-import win32com.client  # pywin32
 import ipinfo
+import win32com.client  # pywin32
 
 SIG_RE = re.compile(r"^\s*(sig-name|sname)\s*:\s*(.*)\s*$", re.IGNORECASE)
 SRC_RE = re.compile(r"^\s*src\s*:\s*$", re.IGNORECASE)
@@ -68,8 +68,6 @@ def iter_alert_lines(
 ):
     """
     Yield formatted lines for the summary file, and mark messages read.
-
-    ip_lookup_fn is injected to keep parsing separate from enrichment logic.
     """
     for msg in unread_items:
         body = getattr(msg, "Body", "") or ""
@@ -88,7 +86,6 @@ def iter_alert_lines(
         else:
             yield "\t\tUNIDENTIFIED\n"
 
-        # Mark read (original behavior)
         try:
             msg.Unread = False
         except Exception:
