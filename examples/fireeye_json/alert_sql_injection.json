@@ -1,0 +1,27 @@
+{
+  "msg": "normal",
+  "product": "CMS",
+  "alert": {
+    "occurred": "2026-02-22T15:41:12Z",
+    "severity": "crit",
+    "src": {
+      "ip": "203.0.113.45",
+      "port": 54321
+    },
+    "dst": {
+      "ip": "198.51.100.10",
+      "port": 443
+    },
+    "explanation": {
+      "ips-detected": {
+        "sig-name": "SQL Injection Attempt",
+        "sig-id": "2100017"
+      }
+    },
+    "metadata": {
+      "sensor": "NX01",
+      "alert-id": "ALRT-20260222-0001",
+      "direction": "inbound"
+    }
+  }
+}
