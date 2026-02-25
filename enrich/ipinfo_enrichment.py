@@ -10,7 +10,6 @@ def safe_ipinfo_lookup(handler: ipinfo.Handler, ip: str) -> Optional[str]:
     """
     Return a short human-readable attribution string or None if unknown/unavailable.
     """
-    # Basic IP sanity check (keeps us from calling ipinfo on blanks/garbage)
     if not re.match(r"^\d{1,3}(\.\d{1,3}){3}$", ip):
         return None
 
