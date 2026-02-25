@@ -31,7 +31,7 @@ alert-email-digest/
 │
 ├── main.py
 ├── parsers/
-│ ├── init.py
+│ ├── __init__.py
 │ └── fireeye.py
 ├── enrich/
 │ ├── init.py
@@ -72,7 +72,7 @@ This separation of concerns allows additional alert formats to be added under `p
 Clone the repository:
 
 ```bash
-git clone https://github.com/<your-username>/alert-email-digest.git
+git clone https://github.com/cyberscryer-sec/alert-email-digest.git
 cd alert-email-digest
 ```
 
@@ -148,7 +148,7 @@ The FireEye parser preserves the original email field ordering logic observed in
 
 ## 🧪 Testing 
 
-Synthetic JSON exmaples are located in: `examples/fireeye_json/`. These fixtures simulate realistic FireEye alert payloads using documentation IP ranges (RFC 5737) and contain no sensitive data.
+Examples are located in: `examples/fireeye_json/`. These fixtures simulate realistic FireEye alert payloads using documentation IP ranges (RFC 5737) and contain no sensitive data.
 
 Unit tests validate:
 - Signature extraction
