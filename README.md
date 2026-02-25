@@ -1,5 +1,7 @@
 # alert-email-digest
 
+![CI](https://github.com/cyberscryer-sec/alert-email-digest/actions/workflows/ci.yml/badge.svg)
+
 Python tool for parsing security alert email notifications and generating structured daily incident summaries.
 
 This project automates analyst triage workflows in environments where security alerts were delivered via email (pre-SIEM). It normalizes key alert fields (e.g., signature name, source IP, destination IP, timestamp) and produces a clean daily timeline report for operational visibility and handoff.
