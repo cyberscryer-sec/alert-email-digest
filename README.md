@@ -101,7 +101,6 @@ $env:OUTLOOK_MAILBOX="user@example.com"
 $env:FIREEYE_FOLDER="FireEye"
 $env:IPINFO_TOKEN="your_token_here"
 ```
-You can also copy .env.example to .env for local development (do NOT commit .env).
 
 ## 🚀 Usage
 
