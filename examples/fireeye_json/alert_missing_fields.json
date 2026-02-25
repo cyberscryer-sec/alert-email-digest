@@ -1,0 +1,19 @@
+{
+  "msg": "normal",
+  "product": "CMS",
+  "alert": {
+    "occurred": "2026-02-22T11:00:00Z",
+    "severity": "low",
+    "src": {
+      "ip": "203.0.113.9"
+    },
+    "dst": {
+      "ip": ""
+    },
+    "explanation": {
+      "ips-detected": {
+        "sig-name": ""
+      }
+    }
+  }
+}
