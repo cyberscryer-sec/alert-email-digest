@@ -34,7 +34,7 @@ alert-email-digest/
 │ ├── __init__.py
 │ └── fireeye.py
 ├── enrich/
-│ ├── init.py
+│ ├── __init__.py
 │ └── ipinfo_enrichment.py
 ├── examples/
 │ └── fireeye_json/
