@@ -1,0 +1,27 @@
+{
+  "msg": "normal",
+  "product": "CMS",
+  "alert": {
+    "occurred": "2026-02-22T23:55:44Z",
+    "severity": "med",
+    "src": {
+      "ip": "192.0.2.77",
+      "port": 58744
+    },
+    "dst": {
+      "ip": "198.51.100.88",
+      "port": 8080
+    },
+    "explanation": {
+      "ips-detected": {
+        "sig-name": "Suspicious File Download (Phishing)",
+        "sig-id": "4400910"
+      }
+    },
+    "metadata": {
+      "sensor": "NX03",
+      "alert-id": "ALRT-20260222-0003",
+      "direction": "inbound"
+    }
+  }
+}
