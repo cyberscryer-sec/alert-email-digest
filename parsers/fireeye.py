@@ -6,25 +6,71 @@ from typing import Callable, Iterable, Optional, Tuple
 import ipinfo
 import win32com.client  # pywin32
 
+import json
+from typing import Any
+
 SIG_RE = re.compile(r"^\s*(sig-name|sname)\s*:\s*(.*)\s*$", re.IGNORECASE)
 SRC_RE = re.compile(r"^\s*src\s*:\s*$", re.IGNORECASE)
 IP_RE = re.compile(r"^\s*ip\s*:\s*(.*)\s*$", re.IGNORECASE)
+
+
+def _get_nested(d: dict, path: tuple[str, ...]) -> str:
+    cur: Any = d
+    for key in path:
+        if not isinstance(cur, dict) or key not in cur:
+            return ""
+        cur = cur[key]
+    return cur if isinstance(cur, str) else ""
 
 
 def parse_fireeye_email_body(body: str) -> Tuple[str, str, str]:
     """
     Extract (sig_name, src_ip, dst_ip) from a FireEye alert email body.
 
-    Preserves the original ordering/state-machine behavior:
-      - When a line matches 'src:', the next 'ip:' is treated as src_ip
-      - The following 'ip:' (when not expecting src) is treated as dst_ip
+    Behavior:
+      1) Try JSON parsing first (common FireEye notification formats).
+      2) If not JSON, fall back to the original ordering/state-machine:
+         - 'src:' sets a flag
+         - next 'ip:' becomes src_ip
+         - next 'ip:' becomes dst_ip
     """
+    # --- 1) In-line JSON-first attempt ---
+    text = (body or "").strip()
+    if text.startswith("{") and text.endswith("}"):
+        try:
+            payload = json.loads(text)
+            alert = payload.get("alert", {}) if isinstance(payload, dict) else {}
+
+            src_ip = ""
+            dst_ip = ""
+            sig_name = ""
+
+            src = alert.get("src", {}) if isinstance(alert, dict) else {}
+            dst = alert.get("dst", {}) if isinstance(alert, dict) else {}
+            if isinstance(src, dict):
+                src_ip = (src.get("ip") or "").strip()
+            if isinstance(dst, dict):
+                dst_ip = (dst.get("ip") or "").strip()
+
+            # Common documented location from your fixture template:
+            # alert.explanation.ips-detected.sig-name
+            explanation = alert.get("explanation", {}) if isinstance(alert, dict) else {}
+            if isinstance(explanation, dict):
+                ips_detected = explanation.get("ips-detected", {})
+                if isinstance(ips_detected, dict):
+                    sig_name = (ips_detected.get("sig-name") or "").strip()
+
+            if sig_name or src_ip or dst_ip:
+                return sig_name, src_ip, dst_ip
+        except Exception:
+            pass
+
     sig_name = ""
     src_ip = ""
     dst_ip = ""
     expecting_src_ip = False
 
-    for line in body.splitlines():
+    for line in (body or "").splitlines():
         m = SIG_RE.match(line)
         if m:
             sig_name = m.group(2).strip()
