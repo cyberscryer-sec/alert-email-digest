@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-import re
-from typing import Optional
-
-import ipinfo
+import ipaddress
+from typing import Any, Optional
 
 
-def safe_ipinfo_lookup(handler: ipinfo.Handler, ip: str) -> Optional[str]:
+def safe_ipinfo_lookup(handler: Any, ip: str) -> Optional[str]:
     """
     Return a short human-readable attribution string or None if unknown/unavailable.
     """
-    if not re.match(r"^\d{1,3}(\.\d{1,3}){3}$", ip):
+    try:
+        address = ipaddress.ip_address(ip)
+    except ValueError:
+        return None
+
+    if not address.is_global:
         return None
 
     try:

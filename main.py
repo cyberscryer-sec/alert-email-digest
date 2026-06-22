@@ -1,7 +1,7 @@
 """
 main.py
 
-CLI entry point for generating a daily summary from Outlook FireEye alert emails.
+CLI entry point for generating daily summaries from security alert emails.
 
 Example:
   set IPINFO_TOKEN=xxxx
@@ -16,15 +16,27 @@ import datetime as dt
 import os
 from pathlib import Path
 
-import ipinfo
-
 from enrich.ipinfo_enrichment import safe_ipinfo_lookup
-from parsers.fireeye import get_unread_items, iter_alert_lines
+from inputs import load_file_messages, outlook_items_to_messages
+from models import AlertParser, AlertRecord, EmailMessage
+from parsers.fireeye import FireEyeParser, get_unread_items
+from renderers import write_json_summary, write_text_summary
 
 
-def main():
+PARSER_REGISTRY = {
+    "fireeye": FireEyeParser,
+}
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Generate daily summary from Outlook FireEye alert emails."
+        description="Generate daily summaries from security alert emails."
+    )
+    parser.add_argument(
+        "--source",
+        default="fireeye",
+        choices=sorted(PARSER_REGISTRY),
+        help="Alert source/parser to use.",
     )
     parser.add_argument(
         "--mailbox",
@@ -47,36 +59,111 @@ def main():
         help="Output file path. Default: out/summary_YYYY-MM-DD.txt",
     )
     parser.add_argument(
+        "--json-output",
+        default=None,
+        help="Optional structured JSON output path.",
+    )
+    parser.add_argument(
         "--no-ipinfo",
         action="store_true",
         help="Disable ipinfo enrichment.",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--no-mark-read",
+        action="store_true",
+        help="Do not mark Outlook messages as read after processing.",
+    )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Parse synthetic demo email samples from examples/demo_emails.",
+    )
+    parser.add_argument(
+        "--input-dir",
+        default=None,
+        help="Parse .eml, .json, and .txt samples from a directory instead of Outlook.",
+    )
+    args = parser.parse_args(argv)
 
     today = dt.date.today().isoformat()
     out_path = Path(args.output) if args.output else Path("out") / f"summary_{today}.txt"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    json_path = Path(args.json_output) if args.json_output else None
 
-    ipinfo_handler = None
-    if not args.no_ipinfo:
-        token = os.getenv("IPINFO_TOKEN", "").strip()
-        if token:
-            ipinfo_handler = ipinfo.getHandler(token)
+    alert_parser = build_parser(args.source)
+    messages, can_mark_read = collect_messages(args)
+    records = parse_messages(messages, alert_parser)
+    enrich_records(records, args.no_ipinfo)
 
-    unread = get_unread_items(args.mailbox, args.fireeye_root, args.region)
+    write_text_summary(out_path, records, build_heading(alert_parser, args))
+    if json_path:
+        write_json_summary(json_path, records)
 
-    with out_path.open("a", encoding="utf-8") as f:
-        f.write(f"\nFireEye {args.region}\n")
-        for line in iter_alert_lines(
-            unread_items=unread,
-            ipinfo_handler=ipinfo_handler,
-            ip_lookup_fn=safe_ipinfo_lookup,
-        ):
-            f.write(line)
-        f.write("------------------------------------\n")
+    if can_mark_read and not args.no_mark_read:
+        for message in messages:
+            message.mark_read()
 
     print(f"Wrote: {out_path}")
+    if json_path:
+        print(f"Wrote: {json_path}")
+    print(f"Processed {len(records)} alert(s).")
+    return 0
+
+
+def build_parser(source: str) -> AlertParser:
+    return PARSER_REGISTRY[source]()
+
+
+def collect_messages(args: argparse.Namespace) -> tuple[list[EmailMessage], bool]:
+    if args.demo or args.input_dir:
+        input_dir = (
+            Path(args.input_dir)
+            if args.input_dir
+            else Path("examples") / "demo_emails"
+        )
+        return load_file_messages(input_dir), False
+
+    unread = get_unread_items(args.mailbox, args.fireeye_root, args.region)
+    return outlook_items_to_messages(unread), True
+
+
+def parse_messages(
+    messages: list[EmailMessage],
+    alert_parser: AlertParser,
+) -> list[AlertRecord]:
+    return [alert_parser.parse_email(message) for message in messages]
+
+
+def enrich_records(records: list[AlertRecord], no_ipinfo: bool) -> None:
+    handler = build_ipinfo_handler(no_ipinfo)
+    if handler is None:
+        return
+
+    for record in records:
+        if not record.src_ip:
+            continue
+        attribution = safe_ipinfo_lookup(handler, record.src_ip.strip())
+        if attribution:
+            record.details["source_attribution"] = attribution
+
+
+def build_ipinfo_handler(no_ipinfo: bool):
+    if no_ipinfo:
+        return None
+
+    token = os.getenv("IPINFO_TOKEN", "").strip()
+    if not token:
+        return None
+
+    import ipinfo
+
+    return ipinfo.getHandler(token)
+
+
+def build_heading(alert_parser: AlertParser, args: argparse.Namespace) -> str:
+    if args.demo:
+        return f"{alert_parser.display_name} Demo"
+    return f"{alert_parser.display_name} {args.region}"
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
